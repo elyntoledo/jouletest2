@@ -1,0 +1,176 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "winterbudcalculator",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.18.2",
+            "toolsId": "bb392195-430a-4cab-b8b9-c270621f7c4d"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/odata/v4/winter-bud-calculator-app-srv/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "odataVersion": "4.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.136.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "winterbudcalculator.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "WinterBudCalculatorsList",
+                    "target": "WinterBudCalculatorsList"
+                },
+                {
+                    "pattern": "WinterBudCalculators({key}):?query:",
+                    "name": "WinterBudCalculatorsObjectPage",
+                    "target": "WinterBudCalculatorsObjectPage"
+                },
+                {
+                    "pattern": "WinterBudCalculators({key})/calculatorA({key2}):?query:",
+                    "name": "CalculatorAObjectPage",
+                    "target": "CalculatorAObjectPage"
+                },
+                {
+                    "pattern": "WinterBudCalculators({key})/calculatorB({key2}):?query:",
+                    "name": "CalculatorBObjectPage",
+                    "target": "CalculatorBObjectPage"
+                }
+            ],
+            "targets": {
+                "WinterBudCalculatorsList": {
+                    "type": "Component",
+                    "id": "WinterBudCalculatorsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/WinterBudCalculators",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "WinterBudCalculators": {
+                                    "detail": {
+                                        "route": "WinterBudCalculatorsObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "WinterBudCalculatorsObjectPage": {
+                    "type": "Component",
+                    "id": "WinterBudCalculatorsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/WinterBudCalculators",
+                            "navigation": {
+                                "calculatorA": {
+                                    "detail": {
+                                        "route": "CalculatorAObjectPage"
+                                    }
+                                },
+                                "calculatorB": {
+                                    "detail": {
+                                        "route": "CalculatorBObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "CalculatorAObjectPage": {
+                    "type": "Component",
+                    "id": "CalculatorAObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/WinterBudCalculators/calculatorA"
+                        }
+                    }
+                },
+                "CalculatorBObjectPage": {
+                    "type": "Component",
+                    "id": "CalculatorBObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/WinterBudCalculators/calculatorB"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}

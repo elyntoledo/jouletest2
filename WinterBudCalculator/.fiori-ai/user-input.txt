@@ -1,0 +1,72 @@
+    I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:  
+    Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B.  
+    Winter Bud Calculators:  
+    Fields:  
+    Calculator A:  
+    Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),  
+    Average_size (Numeric, Mandatory, Range: 16–49),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Internode_spacing (Numeric, Mandatory, &gt; 0).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Winter_bud_volume (Numeric),  
+    Cane_spacing (Numeric).  
+
+    Calculator B:  
+    Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Average_size (Numeric, Mandatory, Range: 16–49).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Target_class1_trays (Numeric).  
+
+    Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume. 
+
+Processing Logic:  
+    Calculator A:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000  
+        ```  
+    2. Calculate `Winter_bud_volume`:  
+        ```  
+        Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud  
+        ```  
+    3. Calculate `Cane_spacing`:  
+        ```  
+        Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000  
+        ```  
+
+    Calculator B:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud  
+        ```  
+    2. Calculate `Target_class1_trays`:  
+        ```  
+        Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000  
+        ```  
+
+    Additionally, I need the ability to create, update, and delete functionality.  
+    Error Handling:  
+    - Use `req.error()` or `req.reject()` for invalid inputs.  
+    - Example error messages:  
+        - "Please enter Target Class 1 trays."  
+        - "Target Class 1 trays should be between 1 and 30,000."  
+        - "Average size must be between 16 and 49."  
+        - "Winter bud volume must be greater than 0."  
+    - Implement try-catch blocks for API calls and database operations.  
+    - Sample error handling:  
+        ```  
+        try {  
+            const result = await executeCalculator();  
+        } catch (error) {  
+            req.error(500, "Calculation failed. Please check your inputs.");  
+        }  
+        ```

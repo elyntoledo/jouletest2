@@ -1,0 +1,156 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "fruitsizeprofileapp",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.18.2",
+            "toolsId": "24f221b1-9566-46a8-a089-61d759c753ab"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/odata/v4/fruit-size-profile-srv/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "odataVersion": "4.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.136.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "fruitsizeprofileapp.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "FruitSizeProfilesList",
+                    "target": "FruitSizeProfilesList"
+                },
+                {
+                    "pattern": "FruitSizeProfiles({key}):?query:",
+                    "name": "FruitSizeProfilesObjectPage",
+                    "target": "FruitSizeProfilesObjectPage"
+                },
+                {
+                    "pattern": "FruitSizeProfiles({key})/freshFruitWeightSamples({key2}):?query:",
+                    "name": "FreshFruitWeightSamplesObjectPage",
+                    "target": "FreshFruitWeightSamplesObjectPage"
+                }
+            ],
+            "targets": {
+                "FruitSizeProfilesList": {
+                    "type": "Component",
+                    "id": "FruitSizeProfilesList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/FruitSizeProfiles",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "FruitSizeProfiles": {
+                                    "detail": {
+                                        "route": "FruitSizeProfilesObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "FruitSizeProfilesObjectPage": {
+                    "type": "Component",
+                    "id": "FruitSizeProfilesObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/FruitSizeProfiles",
+                            "navigation": {
+                                "freshFruitWeightSamples": {
+                                    "detail": {
+                                        "route": "FreshFruitWeightSamplesObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "FreshFruitWeightSamplesObjectPage": {
+                    "type": "Component",
+                    "id": "FreshFruitWeightSamplesObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/FruitSizeProfiles/freshFruitWeightSamples"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}

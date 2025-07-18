@@ -1,0 +1,34 @@
+I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:  
+    Description: As a grower or agricultural personnel, I need to calculate thinning weight for fruits based on various parameters and validate input fields for accuracy.  
+    Thinning Calculator App:  
+    Fields:  
+    Country (Dropdown: France, Italy, Japan, New Zealand, South Korea, Key, Mandatory),  
+    Variety (Dropdown: SunGold, Green, RubyRed, Key, Mandatory),  
+    Date_FullBloom (Date, Mandatory),  
+    Date_Thinning (Date, Mandatory),  
+    Date_Harvest (Date, Mandatory),  
+    Target_SizeRemove (Dropdown: Gold3: 36, 39 (NSS), 42 (NSS), Undersized; Hayward: 39, 42, 46 (NSS), Undersized; Red19: 42, 46 (NSS), 49 (NSS), Undersized, Mandatory),  
+    Thinning_Weight (Numeric).  
+    Selection Fields: Country, Variety, Target_SizeRemove
+
+Processing Logic:  
+    1. Validate input fields:  
+        - Ensure Fruit Variety exists in the Fruit Variety Master for the selected Country.  
+        - Validate Date of Full Bloom against the Bloom start and end dates.  
+        - Validate Date of Thinning against the Growth Curve Master.  
+        - Validate Date of Harvest against the Growth Curve Master.  
+        - Ensure Target Size to Remove exists in the Fruit Sizes Values Master for the selected Country and Variety.  
+    2. Calculate Thinning Weight:  
+        - Determine DFB_HARVEST_days: Days between Date of Full Bloom and Date of Harvest.  
+        - Lookup FW_Constant for DFB_HARVEST_days from Growth Curve Master.  
+        - Determine DFB_THINNING_days: Days between Date of Full Bloom and Date of Thinning.  
+        - Lookup FW_Constant for DFB_THINNING_days from Growth Curve Master.  
+        - Lookup Maximum Weight Band for Target Size to Remove from Fruit Sizes Values Master.  
+        - Formula: Thinning Weight = MaximumWeightBand / (DFB_HARVEST_FW / DFB_THINNING_FW).  
+    3. Error Handling:  
+        - Invalid Fruit Variety: "Invalid Fruit Variety. Please choose a valid Fruit Variety."  
+        - Invalid Date of Full Bloom: "The Date of Full Bloom must be between the following Bloom dates D1 and D2."  
+        - Invalid Date of Thinning: "The Date of Thinning must be between (N1) & (N2) for Variety V."  
+        - Invalid Date of Harvest: "The Date of Harvest must be between X & (N2) for Variety V."  
+        - Missing Target Fruit Size: "Missing Target Fruit Size - Thin Target Size values."  
+    Additionally, I need the ability to create, update, and delete functionality.

@@ -1,0 +1,50 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FruitSizeProfileCalculator",
+      "request": "launch",
+      "type": "node",
+      "cwd": "${workspaceFolder}/FruitSizeProfileCalculator",
+      "runtimeExecutable": "cds",
+      "args": [
+        "serve",
+        "--with-mocks",
+        "--in-memory?"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "ThinningCalculator",
+      "request": "launch",
+      "type": "node",
+      "cwd": "${workspaceFolder}/ThinningCalculator",
+      "runtimeExecutable": "cds",
+      "args": [
+        "serve",
+        "--with-mocks",
+        "--in-memory?"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "WinterBudCalculator",
+      "request": "launch",
+      "type": "node",
+      "cwd": "${workspaceFolder}/WinterBudCalculator",
+      "runtimeExecutable": "cds",
+      "args": [
+        "serve",
+        "--with-mocks",
+        "--in-memory?"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ]
+}

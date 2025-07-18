@@ -1,0 +1,381 @@
+{
+    "namespace": "thinningCalculator",
+    "entities": [
+        {
+            "name": "ThinningCalculations",
+            "label": "Thinning Calculation",
+            "associations": [
+                {
+                    "name": "fruitVarietyMaster",
+                    "target": "FruitVarietyMasters",
+                    "multiplicity": "many",
+                    "backAssociation": "thinningCalculations"
+                },
+                {
+                    "name": "growthCurveMaster",
+                    "target": "GrowthCurveMasters",
+                    "multiplicity": "many",
+                    "backAssociation": "thinningCalculations"
+                },
+                {
+                    "name": "fruitSizesValuesMaster",
+                    "target": "FruitSizesValuesMasters",
+                    "multiplicity": "many",
+                    "backAssociation": "thinningCalculations"
+                }
+            ],
+            "labelPlural": "Thinning Calculations",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "country",
+                    "type": "String(50)",
+                    "label": "Country",
+                    "additionalInfo": "Dropdown: France, Italy, Japan, New Zealand, South Korea; Key, Mandatory",
+                    "essentialElement": true,
+                    "semanticKey": true,
+                    "values": [
+                        "France",
+                        "Italy",
+                        "Japan",
+                        "New Zealand",
+                        "South Korea"
+                    ],
+                    "hasFixedValuesList": true,
+                    "hasColorsOrCriticality": false,
+                    "reason": "The property 'country' represents geographical locations and does not inherently have positive or negative connotations in the context of thinning calculations.",
+                    "mapping": []
+                },
+                {
+                    "name": "variety",
+                    "type": "String(50)",
+                    "label": "Variety",
+                    "additionalInfo": "Dropdown: SunGold, Green, RubyRed; Key, Mandatory",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "SunGold",
+                        "Green",
+                        "RubyRed"
+                    ],
+                    "hasFixedValuesList": true,
+                    "hasColorsOrCriticality": false,
+                    "reason": "The property 'variety' represents different types of fruit varieties and is neutral in the context of thinning calculations.",
+                    "mapping": []
+                },
+                {
+                    "name": "dateFullBloom",
+                    "type": "Date",
+                    "label": "Date Full Bloom",
+                    "additionalInfo": "Mandatory; Validate against Bloom start and end dates",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "dateThinning",
+                    "type": "Date",
+                    "label": "Date Thinning",
+                    "additionalInfo": "Mandatory; Validate against Growth Curve Master",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "dateHarvest",
+                    "type": "Date",
+                    "label": "Date Harvest",
+                    "additionalInfo": "Mandatory; Validate against Growth Curve Master",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "targetSizeRemove",
+                    "type": "String(50)",
+                    "label": "Target Size Remove",
+                    "additionalInfo": "Dropdown: Gold3: 36, 39 (NSS), 42 (NSS), Undersized; Hayward: 39, 42, 46 (NSS), Undersized; Red19: 42, 46 (NSS), 49 (NSS), Undersized; Mandatory",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "Gold3: 36",
+                        "Gold3: 39 (NSS)",
+                        "Gold3: 42 (NSS)",
+                        "Gold3: Undersized",
+                        "Hayward: 39",
+                        "Hayward: 42",
+                        "Hayward: 46 (NSS)",
+                        "Hayward: Undersized",
+                        "Red19: 42",
+                        "Red19: 46 (NSS)",
+                        "Red19: 49 (NSS)",
+                        "Red19: Undersized"
+                    ],
+                    "hasFixedValuesList": true,
+                    "hasColorsOrCriticality": true,
+                    "reason": "The property 'targetSizeRemove' can have criticality based on the size being undersized or not suitable (NSS), which can be considered less desirable in the context of thinning calculations.",
+                    "mapping": [
+                        {
+                            "value": "Gold3: 36",
+                            "colorOrCriticality": "neutral",
+                            "reason": "This size is a standard size and does not have any criticality."
+                        },
+                        {
+                            "value": "Gold3: 39 (NSS)",
+                            "colorOrCriticality": "critical",
+                            "reason": "This size is marked as NSS (Not Suitable Size), indicating a potential issue."
+                        },
+                        {
+                            "value": "Gold3: 42 (NSS)",
+                            "colorOrCriticality": "critical",
+                            "reason": "This size is marked as NSS (Not Suitable Size), indicating a potential issue."
+                        },
+                        {
+                            "value": "Gold3: Undersized",
+                            "colorOrCriticality": "negative",
+                            "reason": "Undersized fruits are generally considered undesirable."
+                        },
+                        {
+                            "value": "Hayward: 39",
+                            "colorOrCriticality": "neutral",
+                            "reason": "This size is a standard size and does not have any criticality."
+                        },
+                        {
+                            "value": "Hayward: 42",
+                            "colorOrCriticality": "neutral",
+                            "reason": "This size is a standard size and does not have any criticality."
+                        },
+                        {
+                            "value": "Hayward: 46 (NSS)",
+                            "colorOrCriticality": "critical",
+                            "reason": "This size is marked as NSS (Not Suitable Size), indicating a potential issue."
+                        },
+                        {
+                            "value": "Hayward: Undersized",
+                            "colorOrCriticality": "negative",
+                            "reason": "Undersized fruits are generally considered undesirable."
+                        },
+                        {
+                            "value": "Red19: 42",
+                            "colorOrCriticality": "neutral",
+                            "reason": "This size is a standard size and does not have any criticality."
+                        },
+                        {
+                            "value": "Red19: 46 (NSS)",
+                            "colorOrCriticality": "critical",
+                            "reason": "This size is marked as NSS (Not Suitable Size), indicating a potential issue."
+                        },
+                        {
+                            "value": "Red19: 49 (NSS)",
+                            "colorOrCriticality": "critical",
+                            "reason": "This size is marked as NSS (Not Suitable Size), indicating a potential issue."
+                        },
+                        {
+                            "value": "Red19: Undersized",
+                            "colorOrCriticality": "negative",
+                            "reason": "Undersized fruits are generally considered undesirable."
+                        }
+                    ],
+                    "criticalities": [
+                        0,
+                        2,
+                        2,
+                        1,
+                        0,
+                        0,
+                        2,
+                        1,
+                        0,
+                        2,
+                        2,
+                        1
+                    ]
+                },
+                {
+                    "name": "thinningWeight",
+                    "type": "Decimal",
+                    "label": "Thinning Weight",
+                    "additionalInfo": "Calculated field; Numeric",
+                    "key": false,
+                    "essentialElement": false
+                }
+            ]
+        },
+        {
+            "name": "FruitVarietyMasters",
+            "label": "Fruit Variety Master",
+            "associations": [
+                {
+                    "name": "thinningCalculations",
+                    "target": "ThinningCalculations",
+                    "multiplicity": "one",
+                    "isComposition": false
+                }
+            ],
+            "labelPlural": "Fruit Variety Masters",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "fruitVariety",
+                    "type": "String(50)",
+                    "label": "Fruit Variety",
+                    "additionalInfo": "Ensure Fruit Variety exists for the selected Country",
+                    "essentialElement": true,
+                    "semanticKey": true
+                }
+            ]
+        },
+        {
+            "name": "GrowthCurveMasters",
+            "label": "Growth Curve Master",
+            "associations": [
+                {
+                    "name": "thinningCalculations",
+                    "target": "ThinningCalculations",
+                    "multiplicity": "one",
+                    "isComposition": false
+                }
+            ],
+            "labelPlural": "Growth Curve Masters",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "growthCurveId",
+                    "type": "String(50)",
+                    "label": "Growth Curve Id",
+                    "additionalInfo": "Used for validating Date of Thinning and Date of Harvest",
+                    "essentialElement": true,
+                    "semanticKey": true
+                }
+            ]
+        },
+        {
+            "name": "FruitSizesValuesMasters",
+            "label": "Fruit Sizes Values Master",
+            "associations": [
+                {
+                    "name": "thinningCalculations",
+                    "target": "ThinningCalculations",
+                    "multiplicity": "one",
+                    "isComposition": false
+                }
+            ],
+            "labelPlural": "Fruit Sizes Values Masters",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "fruitSizeValue",
+                    "type": "String(50)",
+                    "label": "Fruit Size Value",
+                    "additionalInfo": "Ensure Target Size to Remove exists for the selected Country and Variety",
+                    "essentialElement": true,
+                    "semanticKey": true
+                }
+            ]
+        }
+    ],
+    "service": {
+        "name": "thinningCalculatorSrv",
+        "path": "srv/service.cds"
+    },
+    "applications": [
+        {
+            "pages": [
+                {
+                    "type": "ListReport",
+                    "entityType": "ThinningCalculations",
+                    "listReportContent": {
+                        "loadDataOnAppLaunch": "Enabled",
+                        "tables": [
+                            {
+                                "title": "Thinning Calculations",
+                                "id": "thinningCalculationsTable",
+                                "baseEntityType": "ThinningCalculations",
+                                "columns": [
+                                    "country",
+                                    "variety",
+                                    "dateFullBloom",
+                                    "dateThinning",
+                                    "dateHarvest",
+                                    "targetSizeRemove",
+                                    "thinningWeight"
+                                ]
+                            }
+                        ],
+                        "filters": [
+                            "country",
+                            "variety",
+                            "targetSizeRemove"
+                        ]
+                    }
+                },
+                {
+                    "type": "ObjectPage",
+                    "entityType": "ThinningCalculations",
+                    "objectPageContent": {
+                        "tableSectionAssociations": [
+                            "fruitVarietyMaster",
+                            "growthCurveMaster",
+                            "fruitSizesValuesMaster"
+                        ],
+                        "sections": [
+                            {
+                                "title": "Fruit Variety Master",
+                                "id": "fruitVarietyMasterSection",
+                                "isTableSection": true,
+                                "fields": [
+                                    "fruitVarietyMaster/fruitVariety"
+                                ]
+                            },
+                            {
+                                "title": "Growth Curve Master",
+                                "id": "growthCurveMasterSection",
+                                "isTableSection": true,
+                                "fields": [
+                                    "growthCurveMaster/growthCurveId"
+                                ]
+                            },
+                            {
+                                "title": "Fruit Sizes Values Master",
+                                "id": "fruitSizesValuesMasterSection",
+                                "isTableSection": true,
+                                "fields": [
+                                    "fruitSizesValuesMaster/fruitSizeValue"
+                                ]
+                            }
+                        ],
+                        "tabs": [
+                            {
+                                "title": "Details",
+                                "id": "detailsTab",
+                                "subsections": [
+                                    "fruitVarietyMasterSection",
+                                    "growthCurveMasterSection",
+                                    "fruitSizesValuesMasterSection"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "name": "thinningCalculatorApp"
+        }
+    ]
+}

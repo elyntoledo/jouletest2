@@ -1,0 +1,524 @@
+{
+    "namespace": "winterBudCalculatorApp",
+    "entities": [
+        {
+            "name": "WinterBudCalculators",
+            "label": "Winter Bud Calculator",
+            "associations": [
+                {
+                    "name": "calculatorA",
+                    "target": "CalculatorA",
+                    "multiplicity": "many",
+                    "backAssociation": "winterBudCalculators"
+                },
+                {
+                    "name": "calculatorB",
+                    "target": "CalculatorB",
+                    "multiplicity": "many",
+                    "backAssociation": "winterBudCalculators"
+                }
+            ],
+            "labelPlural": "Winter Bud Calculators",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "name",
+                    "type": "String(50)",
+                    "label": "Name",
+                    "semanticKey": true,
+                    "additionalInfo": "Name of Winter Bud Calculator"
+                }
+            ]
+        },
+        {
+            "name": "CalculatorA",
+            "label": "Calculator A",
+            "associations": [
+                {
+                    "name": "winterBudCalculators",
+                    "target": "WinterBudCalculators",
+                    "multiplicity": "one",
+                    "isComposition": false
+                }
+            ],
+            "labelPlural": "Calculators A",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "targetClass1Trays",
+                    "type": "String(50)",
+                    "label": "Target Class1 Trays",
+                    "additionalInfo": "Numeric, Key, Mandatory, Range: 1–30,000",
+                    "essentialElement": true,
+                    "semanticKey": true,
+                    "values": [
+                        "1",
+                        "30000"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "The number of trays can be considered good or bad depending on the target production goals.",
+                    "mapping": [
+                        {
+                            "value": "1",
+                            "colorOrCriticality": "negative",
+                            "reason": "A value of 1 is likely too low for production goals."
+                        },
+                        {
+                            "value": "30000",
+                            "colorOrCriticality": "positive",
+                            "reason": "A value of 30000 is likely to meet or exceed production goals."
+                        }
+                    ],
+                    "criticalities": [
+                        1,
+                        3
+                    ]
+                },
+                {
+                    "name": "averageSize",
+                    "type": "String(50)",
+                    "label": "Average Size",
+                    "additionalInfo": "Numeric, Mandatory, Range: 16–49",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "16",
+                        "49"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": false,
+                    "reason": "Average size is typically a neutral value as it depends on the context of the calculation."
+                },
+                {
+                    "name": "orchardThinRejectPerc",
+                    "type": "String(50)",
+                    "label": "Orchard Thin Reject Perc",
+                    "additionalInfo": "Numeric, Mandatory, Range: 1–100%",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "1%",
+                        "100%"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+                    "mapping": [
+                        {
+                            "value": "1%",
+                            "colorOrCriticality": "positive",
+                            "reason": "A low reject percentage is favorable."
+                        },
+                        {
+                            "value": "100%",
+                            "colorOrCriticality": "negative",
+                            "reason": "A high reject percentage is unfavorable."
+                        }
+                    ],
+                    "criticalities": [
+                        3,
+                        1
+                    ]
+                },
+                {
+                    "name": "packoutRejectPerc",
+                    "type": "String(50)",
+                    "label": "Packout Reject Perc",
+                    "additionalInfo": "Numeric, Mandatory, Range: 1–100%",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "1%",
+                        "100%"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+                    "mapping": [
+                        {
+                            "value": "1%",
+                            "colorOrCriticality": "positive",
+                            "reason": "A low reject percentage is favorable."
+                        },
+                        {
+                            "value": "100%",
+                            "colorOrCriticality": "negative",
+                            "reason": "A high reject percentage is unfavorable."
+                        }
+                    ],
+                    "criticalities": [
+                        3,
+                        1
+                    ]
+                },
+                {
+                    "name": "unproductivePerc",
+                    "type": "String(50)",
+                    "label": "Unproductive Perc",
+                    "additionalInfo": "Numeric, Mandatory, Range: 1–100%",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "1%",
+                        "100%"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "A high unproductive percentage is generally negative as it indicates inefficiency.",
+                    "mapping": [
+                        {
+                            "value": "1%",
+                            "colorOrCriticality": "positive",
+                            "reason": "A low unproductive percentage is favorable."
+                        },
+                        {
+                            "value": "100%",
+                            "colorOrCriticality": "negative",
+                            "reason": "A high unproductive percentage is unfavorable."
+                        }
+                    ],
+                    "criticalities": [
+                        3,
+                        1
+                    ]
+                },
+                {
+                    "name": "flowersPerBud",
+                    "type": "Integer",
+                    "label": "Flowers Per Bud",
+                    "additionalInfo": "Numeric, Mandatory, > 0",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "internodeSpacing",
+                    "type": "Decimal",
+                    "label": "Internode Spacing",
+                    "additionalInfo": "Numeric, Mandatory, > 0",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "fruitVolumeM2",
+                    "type": "Decimal",
+                    "label": "Fruit Volume M2",
+                    "additionalInfo": "Output Field: Numeric",
+                    "key": false,
+                    "essentialElement": false
+                },
+                {
+                    "name": "winterBudVolume",
+                    "type": "Decimal",
+                    "label": "Winter Bud Volume",
+                    "additionalInfo": "Output Field: Numeric",
+                    "key": false,
+                    "essentialElement": false
+                },
+                {
+                    "name": "caneSpacing",
+                    "type": "Decimal",
+                    "label": "Cane Spacing",
+                    "additionalInfo": "Output Field: Numeric",
+                    "key": false,
+                    "essentialElement": false
+                }
+            ]
+        },
+        {
+            "name": "CalculatorB",
+            "label": "Calculator B",
+            "associations": [
+                {
+                    "name": "winterBudCalculators",
+                    "target": "WinterBudCalculators",
+                    "multiplicity": "one",
+                    "isComposition": false
+                }
+            ],
+            "labelPlural": "Calculators B",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "winterBudVolume",
+                    "type": "Decimal",
+                    "label": "Winter Bud Volume",
+                    "additionalInfo": "Numeric, Key, Mandatory, > 0",
+                    "essentialElement": true,
+                    "semanticKey": true
+                },
+                {
+                    "name": "flowersPerBud",
+                    "type": "Integer",
+                    "label": "Flowers Per Bud",
+                    "additionalInfo": "Numeric, Mandatory, > 0",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "orchardThinRejectPerc",
+                    "type": "String(50)",
+                    "label": "Orchard Thin Reject Perc",
+                    "additionalInfo": "Numeric, Mandatory, Range: 1–100%",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "1%",
+                        "100%"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+                    "mapping": [
+                        {
+                            "value": "1%",
+                            "colorOrCriticality": "positive",
+                            "reason": "A low reject percentage is favorable."
+                        },
+                        {
+                            "value": "100%",
+                            "colorOrCriticality": "negative",
+                            "reason": "A high reject percentage is unfavorable."
+                        }
+                    ],
+                    "criticalities": [
+                        3,
+                        1
+                    ]
+                },
+                {
+                    "name": "packoutRejectPerc",
+                    "type": "String(50)",
+                    "label": "Packout Reject Perc",
+                    "additionalInfo": "Numeric, Mandatory, Range: 1–100%",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "1%",
+                        "100%"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+                    "mapping": [
+                        {
+                            "value": "1%",
+                            "colorOrCriticality": "positive",
+                            "reason": "A low reject percentage is favorable."
+                        },
+                        {
+                            "value": "100%",
+                            "colorOrCriticality": "negative",
+                            "reason": "A high reject percentage is unfavorable."
+                        }
+                    ],
+                    "criticalities": [
+                        3,
+                        1
+                    ]
+                },
+                {
+                    "name": "unproductivePerc",
+                    "type": "String(50)",
+                    "label": "Unproductive Perc",
+                    "additionalInfo": "Numeric, Mandatory, Range: 1–100%",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "1%",
+                        "100%"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": true,
+                    "reason": "A high unproductive percentage is generally negative as it indicates inefficiency.",
+                    "mapping": [
+                        {
+                            "value": "1%",
+                            "colorOrCriticality": "positive",
+                            "reason": "A low unproductive percentage is favorable."
+                        },
+                        {
+                            "value": "100%",
+                            "colorOrCriticality": "negative",
+                            "reason": "A high unproductive percentage is unfavorable."
+                        }
+                    ],
+                    "criticalities": [
+                        3,
+                        1
+                    ]
+                },
+                {
+                    "name": "averageSize",
+                    "type": "String(50)",
+                    "label": "Average Size",
+                    "additionalInfo": "Numeric, Mandatory, Range: 16–49",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "16",
+                        "49"
+                    ],
+                    "hasFixedValuesList": false,
+                    "hasColorsOrCriticality": false,
+                    "reason": "Average size is typically a neutral value as it depends on the context of the calculation."
+                },
+                {
+                    "name": "fruitVolumeM2",
+                    "type": "Decimal",
+                    "label": "Fruit Volume M2",
+                    "additionalInfo": "Output Field: Numeric",
+                    "key": false,
+                    "essentialElement": false
+                },
+                {
+                    "name": "targetClass1Trays",
+                    "type": "Integer",
+                    "label": "Target Class1 Trays",
+                    "additionalInfo": "Output Field: Numeric",
+                    "key": false,
+                    "essentialElement": false
+                }
+            ]
+        }
+    ],
+    "service": {
+        "name": "winterBudCalculatorAppSrv",
+        "path": "srv/service.cds"
+    },
+    "applications": [
+        {
+            "pages": [
+                {
+                    "type": "ListReport",
+                    "entityType": "WinterBudCalculators",
+                    "listReportContent": {
+                        "loadDataOnAppLaunch": "Enabled",
+                        "tables": [
+                            {
+                                "title": "Winter Bud Calculators",
+                                "id": "WinterBudCalculatorsTable",
+                                "baseEntityType": "WinterBudCalculators",
+                                "columns": [
+                                    "name"
+                                ]
+                            }
+                        ],
+                        "filters": [
+                            "calculatorA/targetClass1Trays",
+                            "calculatorA/averageSize",
+                            "calculatorA/orchardThinRejectPerc",
+                            "calculatorA/packoutRejectPerc",
+                            "calculatorA/unproductivePerc",
+                            "calculatorA/flowersPerBud",
+                            "calculatorA/internodeSpacing",
+                            "calculatorA/winterBudVolume"
+                        ]
+                    }
+                },
+                {
+                    "type": "ObjectPage",
+                    "entityType": "WinterBudCalculators",
+                    "objectPageContent": {
+                        "tableSectionAssociations": [
+                            "calculatorA",
+                            "calculatorB"
+                        ],
+                        "sections": [],
+                        "tabs": []
+                    }
+                },
+                {
+                    "type": "ObjectPage",
+                    "entityType": "CalculatorA",
+                    "objectPageContent": {
+                        "tableSectionAssociations": [],
+                        "sections": [
+                            {
+                                "title": "Calculator A Data",
+                                "id": "calculatorAData",
+                                "isTableSection": true,
+                                "fields": []
+                            },
+                            {
+                                "title": "Calculator B Data",
+                                "id": "calculatorBData",
+                                "isTableSection": true,
+                                "fields": []
+                            }
+                        ],
+                        "tabs": [
+                            {
+                                "title": "Calculator A Overview",
+                                "id": "calculatorAOverview",
+                                "subsections": [
+                                    "calculatorAData"
+                                ]
+                            },
+                            {
+                                "title": "Calculator B Overview",
+                                "id": "calculatorBOverview",
+                                "subsections": [
+                                    "calculatorBData"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "ObjectPage",
+                    "entityType": "CalculatorB",
+                    "objectPageContent": {
+                        "tableSectionAssociations": [],
+                        "sections": [
+                            {
+                                "title": "Calculator A Data",
+                                "id": "calculatorAData1",
+                                "isTableSection": true,
+                                "fields": []
+                            },
+                            {
+                                "title": "Calculator B Data",
+                                "id": "calculatorBData1",
+                                "isTableSection": true,
+                                "fields": []
+                            }
+                        ],
+                        "tabs": [
+                            {
+                                "title": "Calculator A",
+                                "id": "calculatorATab",
+                                "subsections": [
+                                    "calculatorAData1"
+                                ]
+                            },
+                            {
+                                "title": "Calculator B",
+                                "id": "calculatorBTab",
+                                "subsections": [
+                                    "calculatorBData1"
+                                ]
+                            }
+                        ]
+                    }
+                }
+            ],
+            "name": "winterBudCalculator"
+        }
+    ]
+}

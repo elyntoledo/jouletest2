@@ -1,0 +1,1903 @@
+2025-07-10T07:28:10.098Z [info] Project generation uses model: "gpt-4o", version: "latest"
+2025-07-10T07:28:10.100Z [info] 1/8: Generate CAP model using LLM
+2025-07-10T07:28:17.803Z [info] 
+==========LLM call for step "extractAppSkeleton":==========
+You help the user building a Fiori Elements application described in the user input.
+
+A Fiori Elements application typically starts with a ListReport page showing the data of the base entity of the application in a table.
+Details of a specific table row are shown in the ObjectPage. This first ObjectPage is therefore based on the base entity of the application.
+An ObjectPage can contain one or more table sections based on to-many associations of its entity type.
+The details of a table section row can be shown in an another ObjectPage based on the associations target entity.
+
+Your task is to find the entities (with their to-many associations) as well as the ObjectPages (with the to-many associations they use in table sections) described in the user input below.
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "entities": {
+      "type": "array",
+      "description": "Define all entities and their to-many associations; entity properties will be determined later",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "UpperCamelCase, no spaces, plural, e.g. 'Orders'"
+          },
+          "label": {
+            "type": "string",
+            "description": "max two words, singular"
+          },
+          "associations": {
+            "type": "array",
+            "description": "Define to-many associations between entities",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "target": {
+                  "type": "string",
+                  "description": "Points to existing entity, value is entities.name"
+                }
+              },
+              "required": [
+                "name",
+                "target"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "labelPlural": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "label",
+          "associations",
+          "labelPlural"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "baseEntity": {
+      "type": "string",
+      "description": "base entity of ListReport page (if present) and first ObjectPage"
+    },
+    "noListReportPage": {
+      "type": "boolean",
+      "description": "true: no ListReport page will generated, e.g. for applications which start with an (input enabled) Object Page to enter data"
+    },
+    "objectPages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entityType": {
+            "type": "string",
+            "description": "Entity that the ObjectPage is based on, the first ObjectPage is always based on base entity"
+          },
+          "tableSectionsAssociations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "to-many associations of page entity for table sections shown in the ObjectPage"
+          }
+        },
+        "required": [
+          "entityType"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "namespace": {
+      "type": "string",
+      "description": "lowerCamelCase, no spaces allowed"
+    },
+    "applicationName": {
+      "type": "string",
+      "description": "lowerCamelCase, no spaces allowed"
+    },
+    "userInputKind": {
+      "enum": [
+        "UserInterfaceFirst",
+        "DataModelFirst"
+      ],
+      "description": "use 'UserInterfaceFirst' if User input describes the app based on the user interface, i.e. how List Report and Object Pages should look like; use 'DataModelFirst' if User input describes the app based on its data model, i.e. its entities, their elements and associations"
+    }
+  },
+  "required": [
+    "entities",
+    "baseEntity",
+    "objectPages",
+    "namespace",
+    "applicationName",
+    "userInputKind"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+<UserInput>
+    I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:  
+    Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B.  
+    Winter Bud Calculators:  
+    Fields:  
+    Calculator A:  
+    Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),  
+    Average_size (Numeric, Mandatory, Range: 16–49),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Internode_spacing (Numeric, Mandatory, &gt; 0).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Winter_bud_volume (Numeric),  
+    Cane_spacing (Numeric).  
+
+    Calculator B:  
+    Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Average_size (Numeric, Mandatory, Range: 16–49).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Target_class1_trays (Numeric).  
+
+    Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume. 
+
+Processing Logic:  
+    Calculator A:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000  
+        ```  
+    2. Calculate `Winter_bud_volume`:  
+        ```  
+        Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud  
+        ```  
+    3. Calculate `Cane_spacing`:  
+        ```  
+        Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000  
+        ```  
+
+    Calculator B:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud  
+        ```  
+    2. Calculate `Target_class1_trays`:  
+        ```  
+        Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000  
+        ```  
+
+    Additionally, I need the ability to create, update, and delete functionality.  
+    Error Handling:  
+    - Use `req.error()` or `req.reject()` for invalid inputs.  
+    - Example error messages:  
+        - "Please enter Target Class 1 trays."  
+        - "Target Class 1 trays should be between 1 and 30,000."  
+        - "Average size must be between 16 and 49."  
+        - "Winter bud volume must be greater than 0."  
+    - Implement try-catch blocks for API calls and database operations.  
+    - Sample error handling:  
+        ```  
+        try {  
+            const result = await executeCalculator();  
+        } catch (error) {  
+            req.error(500, "Calculation failed. Please check your inputs.");  
+        }  
+        ```
+</UserInput>
+
+----------Response:----------
+```json
+{
+  "entities": [
+    {
+      "name": "WinterBudCalculators",
+      "label": "Winter Bud Calculator",
+      "associations": [
+        {
+          "name": "calculatorA",
+          "target": "CalculatorA"
+        },
+        {
+          "name": "calculatorB",
+          "target": "CalculatorB"
+        }
+      ],
+      "labelPlural": "Winter Bud Calculators"
+    },
+    {
+      "name": "CalculatorA",
+      "label": "Calculator A",
+      "associations": [],
+      "labelPlural": "Calculators A"
+    },
+    {
+      "name": "CalculatorB",
+      "label": "Calculator B",
+      "associations": [],
+      "labelPlural": "Calculators B"
+    }
+  ],
+  "baseEntity": "WinterBudCalculators",
+  "noListReportPage": false,
+  "objectPages": [
+    {
+      "entityType": "WinterBudCalculators",
+      "tableSectionsAssociations": [
+        "calculatorA",
+        "calculatorB"
+      ]
+    },
+    {
+      "entityType": "CalculatorA",
+      "tableSectionsAssociations": []
+    },
+    {
+      "entityType": "CalculatorB",
+      "tableSectionsAssociations": []
+    }
+  ],
+  "namespace": "winterBudCalculatorApp",
+  "applicationName": "winterBudCalculator",
+  "userInputKind": "UserInterfaceFirst"
+}
+```
+2025-07-10T07:28:17.806Z [info] Step "switchBasedOnAppSkeleton": case 0 blocked! Evaluation details:
+ - JSONPath "$.model.applications[0].pages[0]" : [{"type":"ListReport","entityType":"WinterBudCalculators"}]
+2025-07-10T07:28:17.806Z [info] Step "switchBasedOnAppSkeleton": case 1 blocked! Evaluation details:
+ - JSONPath "$.model.applications[0].pages[0].type" : ["ListReport"]
+2025-07-10T07:28:17.806Z [info] Step "switchBasedOnAppSkeleton": case 2 passed! Evaluation details:
+ - JSONPath "$.userInput.imageCount" : [0]
+2025-07-10T07:28:17.806Z [info] Step "runDataModelFirst": workflow "givenSkeletonExtractDataModelFirst" started
+"
+2025-07-10T07:28:34.446Z [info] 
+==========LLM call for step "extractEntitiesProperties":==========
+You help the user refining the DataModel for a Fiori Elements application described in the user input.
+
+The DataModel consists of the following entities and associations:
+- entity "WinterBudCalculators" (with to-many associations to "CalculatorA" and "CalculatorB")
+- entity "CalculatorA" (with to-one association to "WinterBudCalculators")
+- entity "CalculatorB" (with to-one association to "WinterBudCalculators")
+
+Your task is to find the properties for each entity.
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entityName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "description": "camelCase, no spaces"
+          },
+          "type": {
+            "type": "string",
+            "description": "Allowed values: String(50), Boolean, Integer, Decimal, Double, Date, Time, DateTime, Timestamp; String length can vary - i.e. String(20)"
+          },
+          "key": {
+            "type": "boolean",
+            "description": "max. one optional key per entity, only if this element is a semantic key and can uniquely identify the instance"
+          },
+          "essentialElement": {
+            "type": "boolean",
+            "description": "'true' only if element is marked as essential'"
+          },
+          "additionalInfo": {
+            "type": "string",
+            "description": "All additional information from user input, e.g. user description, example values; also consider referenced parts in the user input"
+          }
+        },
+        "required": [
+          "entityName",
+          "name",
+          "type",
+          "additionalInfo"
+        ],
+        "additionalProperties": false
+      },
+      "description": "At least 5 realistic elements (unless explicitly specified)"
+    }
+  },
+  "required": [
+    "elements"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+<UserInput>
+    I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:  
+    Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B.  
+    Winter Bud Calculators:  
+    Fields:  
+    Calculator A:  
+    Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),  
+    Average_size (Numeric, Mandatory, Range: 16–49),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Internode_spacing (Numeric, Mandatory, &gt; 0).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Winter_bud_volume (Numeric),  
+    Cane_spacing (Numeric).  
+
+    Calculator B:  
+    Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Average_size (Numeric, Mandatory, Range: 16–49).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Target_class1_trays (Numeric).  
+
+    Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume. 
+
+Processing Logic:  
+    Calculator A:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000  
+        ```  
+    2. Calculate `Winter_bud_volume`:  
+        ```  
+        Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud  
+        ```  
+    3. Calculate `Cane_spacing`:  
+        ```  
+        Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000  
+        ```  
+
+    Calculator B:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud  
+        ```  
+    2. Calculate `Target_class1_trays`:  
+        ```  
+        Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000  
+        ```  
+
+    Additionally, I need the ability to create, update, and delete functionality.  
+    Error Handling:  
+    - Use `req.error()` or `req.reject()` for invalid inputs.  
+    - Example error messages:  
+        - "Please enter Target Class 1 trays."  
+        - "Target Class 1 trays should be between 1 and 30,000."  
+        - "Average size must be between 16 and 49."  
+        - "Winter bud volume must be greater than 0."  
+    - Implement try-catch blocks for API calls and database operations.  
+    - Sample error handling:  
+        ```  
+        try {  
+            const result = await executeCalculator();  
+        } catch (error) {  
+            req.error(500, "Calculation failed. Please check your inputs.");  
+        }  
+        ```
+</UserInput>
+
+----------Response:----------
+```json
+{
+  "elements": [
+    {
+      "entityName": "WinterBudCalculators",
+      "name": "calculatorA",
+      "type": "String(50)",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Association to CalculatorA"
+    },
+    {
+      "entityName": "WinterBudCalculators",
+      "name": "calculatorB",
+      "type": "String(50)",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Association to CalculatorB"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "targetClass1Trays",
+      "type": "Integer",
+      "key": true,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Key, Mandatory, Range: 1–30,000"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "averageSize",
+      "type": "Integer",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 16–49"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "orchardThinRejectPerc",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 1–100%"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "packoutRejectPerc",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 1–100%"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "unproductivePerc",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 1–100%"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "flowersPerBud",
+      "type": "Integer",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, > 0"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "internodeSpacing",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, > 0"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "fruitVolumeM2",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Output Field: Numeric"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "winterBudVolume",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Output Field: Numeric"
+    },
+    {
+      "entityName": "CalculatorA",
+      "name": "caneSpacing",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Output Field: Numeric"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "winterBudVolume",
+      "type": "Decimal",
+      "key": true,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Key, Mandatory, > 0"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "flowersPerBud",
+      "type": "Integer",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, > 0"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "orchardThinRejectPerc",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 1–100%"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "packoutRejectPerc",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 1–100%"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "unproductivePerc",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 1–100%"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "averageSize",
+      "type": "Integer",
+      "key": false,
+      "essentialElement": true,
+      "additionalInfo": "Numeric, Mandatory, Range: 16–49"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "fruitVolumeM2",
+      "type": "Decimal",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Output Field: Numeric"
+    },
+    {
+      "entityName": "CalculatorB",
+      "name": "targetClass1Trays",
+      "type": "Integer",
+      "key": false,
+      "essentialElement": false,
+      "additionalInfo": "Output Field: Numeric"
+    }
+  ]
+}
+```
+2025-07-10T07:28:43.173Z [info] 
+==========LLM call for step "extractPropertyDetails":==========
+Here is a list of property names, each with the property description that was extracted from previous user input:
+
+WinterBudCalculators_name: Name of Winter Bud Calculator
+CalculatorA_targetClass1Trays: Numeric, Key, Mandatory, Range: 1–30,000
+CalculatorA_averageSize: Numeric, Mandatory, Range: 16–49
+CalculatorA_orchardThinRejectPerc: Numeric, Mandatory, Range: 1–100%
+CalculatorA_packoutRejectPerc: Numeric, Mandatory, Range: 1–100%
+CalculatorA_unproductivePerc: Numeric, Mandatory, Range: 1–100%
+CalculatorA_flowersPerBud: Numeric, Mandatory, > 0
+CalculatorA_internodeSpacing: Numeric, Mandatory, > 0
+CalculatorA_fruitVolumeM2: Output Field: Numeric
+CalculatorA_winterBudVolume: Output Field: Numeric
+CalculatorA_caneSpacing: Output Field: Numeric
+CalculatorB_winterBudVolume: Numeric, Key, Mandatory, > 0
+CalculatorB_flowersPerBud: Numeric, Mandatory, > 0
+CalculatorB_orchardThinRejectPerc: Numeric, Mandatory, Range: 1–100%
+CalculatorB_packoutRejectPerc: Numeric, Mandatory, Range: 1–100%
+CalculatorB_unproductivePerc: Numeric, Mandatory, Range: 1–100%
+CalculatorB_averageSize: Numeric, Mandatory, Range: 16–49
+CalculatorB_fruitVolumeM2: Output Field: Numeric
+CalculatorB_targetClass1Trays: Output Field: Numeric
+
+For each property analyze the description with respect to what property values can be expected.
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "hasFixedValuesList": {
+            "type": "boolean",
+            "description": "Only limited list of values expected, e.g. property is representing e.g. a type, status, category, unit, organization"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Specific property values mentioned as part of the description. Those could be possible values or example values. Don't make up or invent any values"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "properties"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+----------Response:----------
+```json
+{
+  "properties": [
+    {
+      "name": "WinterBudCalculators_name",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorA_targetClass1Trays",
+      "hasFixedValuesList": false,
+      "values": ["1", "30000"]
+    },
+    {
+      "name": "CalculatorA_averageSize",
+      "hasFixedValuesList": false,
+      "values": ["16", "49"]
+    },
+    {
+      "name": "CalculatorA_orchardThinRejectPerc",
+      "hasFixedValuesList": false,
+      "values": ["1%", "100%"]
+    },
+    {
+      "name": "CalculatorA_packoutRejectPerc",
+      "hasFixedValuesList": false,
+      "values": ["1%", "100%"]
+    },
+    {
+      "name": "CalculatorA_unproductivePerc",
+      "hasFixedValuesList": false,
+      "values": ["1%", "100%"]
+    },
+    {
+      "name": "CalculatorA_flowersPerBud",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorA_internodeSpacing",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorA_fruitVolumeM2",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorA_winterBudVolume",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorA_caneSpacing",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorB_winterBudVolume",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorB_flowersPerBud",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorB_orchardThinRejectPerc",
+      "hasFixedValuesList": false,
+      "values": ["1%", "100%"]
+    },
+    {
+      "name": "CalculatorB_packoutRejectPerc",
+      "hasFixedValuesList": false,
+      "values": ["1%", "100%"]
+    },
+    {
+      "name": "CalculatorB_unproductivePerc",
+      "hasFixedValuesList": false,
+      "values": ["1%", "100%"]
+    },
+    {
+      "name": "CalculatorB_averageSize",
+      "hasFixedValuesList": false,
+      "values": ["16", "49"]
+    },
+    {
+      "name": "CalculatorB_fruitVolumeM2",
+      "hasFixedValuesList": false,
+      "values": []
+    },
+    {
+      "name": "CalculatorB_targetClass1Trays",
+      "hasFixedValuesList": false,
+      "values": []
+    }
+  ]
+}
+```
+2025-07-10T07:28:43.174Z [info] Step "switchSimpleOrComplexApp": case 0 blocked! Evaluation details:
+ - JSONPath "$.model.applications[0].pages[2]" : [{"type":"ObjectPage","entityType":"CalculatorA","objectPageContent":{"tableSectionAssociations":[]}}]
+ - JSONPath "$.userInput.lineCount" : [74]
+2025-07-10T07:28:43.174Z [info] Step "switchSimpleOrComplexApp": no condition met - running default steps
+2025-07-10T07:28:43.174Z [info] Step "runFlowForComplexApp": workflow "givenSkeletonExtractComplexApp" started
+"
+2025-07-10T07:28:58.260Z [info] 
+==========LLM call for classifier:==========
+The user input below describes a Fiori Elements application with a ListReport page and multiple ObjectPages.
+ListReport page shows the data of the specific business object as a list or table. ObjectPage shows details of a specific business object instance.
+Your task is to classify the lines based on the same business object representation to the following categories, one line can refer only to a single category:
+ - LIST_REPORT_WINTERBUDCALCULATORS: line describes the ListReport page for "WinterBudCalculators"
+ - OBJECT_PAGE_WINTERBUDCALCULATORS: line describes the ObjectPage for "WinterBudCalculators" with a table of "CalculatorA" and a table of "CalculatorB"
+ - OBJECT_PAGE_CALCULATORA: line describes the ObjectPage for "CalculatorA"
+ - OBJECT_PAGE_CALCULATORB: line describes the ObjectPage for "CalculatorB"
+ - NONE: line is not describing any ListReport page or ObjectPage
+
+Return your findings as csv file with columns "lineContent" and "category"!
+
+<UserInput>
+I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:
+Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B.
+
+    Winter Bud Calculators:  
+    Fields:  
+    Calculator A:  
+    Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),  
+    Average_size (Numeric, Mandatory, Range: 16–49),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Internode_spacing (Numeric, Mandatory, &gt; 0).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Winter_bud_volume (Numeric),  
+    Cane_spacing (Numeric).  
+
+    Calculator B:  
+    Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Average_size (Numeric, Mandatory, Range: 16–49).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Target_class1_trays (Numeric).  
+
+Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume.
+
+
+Processing Logic:  
+    Calculator A:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000
+        ```  
+    2. Calculate `Winter_bud_volume`:  
+        ```  
+        Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud  
+        ```  
+    3. Calculate `Cane_spacing`:  
+        ```  
+        Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000  
+        ```  
+
+    Calculator B:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud  
+        ```  
+    2. Calculate `Target_class1_trays`:  
+        ```  
+Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000
+        ```  
+
+    Additionally, I need the ability to create, update, and delete functionality.  
+    Error Handling:  
+    - Use `req.error()` or `req.reject()` for invalid inputs.  
+    - Example error messages:  
+        - "Please enter Target Class 1 trays."  
+        - "Target Class 1 trays should be between 1 and 30,000."  
+        - "Average size must be between 16 and 49."  
+        - "Winter bud volume must be greater than 0."  
+    - Implement try-catch blocks for API calls and database operations.  
+    - Sample error handling:  
+        ```  
+        try {  
+            const result = await executeCalculator();  
+        } catch (error) {  
+            req.error(500, "Calculation failed. Please check your inputs.");  
+        }  
+        ```
+</UserInput>
+
+----------Response:----------
+```csv
+lineContent,category
+"I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:",NONE
+"Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B.",NONE
+"Winter Bud Calculators:",LIST_REPORT_WINTERBUDCALCULATORS
+"Fields:",NONE
+"Calculator A:",OBJECT_PAGE_WINTERBUDCALCULATORS
+"Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),",OBJECT_PAGE_CALCULATORA
+"Average_size (Numeric, Mandatory, Range: 16–49),",OBJECT_PAGE_CALCULATORA
+"Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),",OBJECT_PAGE_CALCULATORA
+"Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),",OBJECT_PAGE_CALCULATORA
+"Unproductive_perc (Numeric, Mandatory, Range: 1–100%),",OBJECT_PAGE_CALCULATORA
+"Flowers_per_bud (Numeric, Mandatory, &gt; 0),",OBJECT_PAGE_CALCULATORA
+"Internode_spacing (Numeric, Mandatory, &gt; 0).",OBJECT_PAGE_CALCULATORA
+"Output Fields:",NONE
+"Fruit_volume_m2 (Numeric),",OBJECT_PAGE_CALCULATORA
+"Winter_bud_volume (Numeric),",OBJECT_PAGE_CALCULATORA
+"Cane_spacing (Numeric).",OBJECT_PAGE_CALCULATORA
+"Calculator B:",OBJECT_PAGE_WINTERBUDCALCULATORS
+"Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),",OBJECT_PAGE_CALCULATORB
+"Flowers_per_bud (Numeric, Mandatory, &gt; 0),",OBJECT_PAGE_CALCULATORB
+"Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),",OBJECT_PAGE_CALCULATORB
+"Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),",OBJECT_PAGE_CALCULATORB
+"Unproductive_perc (Numeric, Mandatory, Range: 1–100%),",OBJECT_PAGE_CALCULATORB
+"Average_size (Numeric, Mandatory, Range: 16–49).",OBJECT_PAGE_CALCULATORB
+"Output Fields:",NONE
+"Fruit_volume_m2 (Numeric),",OBJECT_PAGE_CALCULATORB
+"Target_class1_trays (Numeric).",OBJECT_PAGE_CALCULATORB
+"Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume.",LIST_REPORT_WINTERBUDCALCULATORS
+"Processing Logic:",NONE
+"Calculator A:",OBJECT_PAGE_CALCULATORA
+"1. Calculate `Fruit_volume_m2`:",OBJECT_PAGE_CALCULATORA
+"```",NONE
+"Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000",OBJECT_PAGE_CALCULATORA
+"```",NONE
+"2. Calculate `Winter_bud_volume`:",OBJECT_PAGE_CALCULATORA
+"```",NONE
+"Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud",OBJECT_PAGE_CALCULATORA
+"```",NONE
+"3. Calculate `Cane_spacing`:",OBJECT_PAGE_CALCULATORA
+"```",NONE
+"Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000",OBJECT_PAGE_CALCULATORA
+"```",NONE
+"Calculator B:",OBJECT_PAGE_CALCULATORB
+"1. Calculate `Fruit_volume_m2`:",OBJECT_PAGE_CALCULATORB
+"```",NONE
+"Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud",OBJECT_PAGE_CALCULATORB
+"```",NONE
+"2. Calculate `Target_class1_trays`:",OBJECT_PAGE_CALCULATORB
+"```",NONE
+"Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000",OBJECT_PAGE_CALCULATORB
+"```",NONE
+"Additionally, I need the ability to create, update, and delete functionality.",NONE
+"Error Handling:",NONE
+"- Use `req.error()` or `req.reject()` for invalid inputs.",NONE
+"- Example error messages:",NONE
+"- \"Please enter Target Class 1 trays.\"",NONE
+"- \"Target Class 1 trays should be between 1 and 30,000.\"",NONE
+"- \"Average size must be between 16 and 49.\"",NONE
+"- \"Winter bud volume must be greater than 0.\"",NONE
+"- Implement try-catch blocks for API calls and database operations.",NONE
+"- Sample error handling:",NONE
+"```",NONE
+"try {",NONE
+"const result = await executeCalculator();",NONE
+"} catch (error) {",NONE
+"req.error(500, \"Calculation failed. Please check your inputs.\");",NONE
+"}",NONE
+"```",NONE
+```
+2025-07-10T07:28:58.261Z [info] Step "loopOverPages": looping over 4 entries
+"
+2025-07-10T07:28:58.262Z [info] Step "loopOverPages" index 0: pageType=ListReport, entityType=WinterBudCalculators
+2025-07-10T07:28:58.262Z [info] Step "ifListReportPage": case 0 passed! Evaluation details:
+ - Variable "pageType" : "ListReport"
+2025-07-10T07:29:01.720Z [info] 
+==========LLM call for step "extractListReport":==========
+A Fiori Elements Application has the following pages:
+ - ListReport page for "WinterBudCalculators"
+ - ObjectPage for "WinterBudCalculators"
+ - ObjectPage for "CalculatorA"
+ - ObjectPage for "CalculatorB"
+
+Available entities with their associations and elements are:
+Entity "WinterBudCalculators"
+   Properties:
+       name: Name of Winter Bud Calculator
+   Associations:
+       calculatorA: association to many entities CalculatorA
+       calculatorB: association to many entities CalculatorB
+Entity "CalculatorA"
+   Properties:
+       targetClass1Trays: Numeric, Key, Mandatory, Range: 1–30,000
+       averageSize: Numeric, Mandatory, Range: 16–49
+       orchardThinRejectPerc: Numeric, Mandatory, Range: 1–100%
+       packoutRejectPerc: Numeric, Mandatory, Range: 1–100%
+       unproductivePerc: Numeric, Mandatory, Range: 1–100%
+       flowersPerBud: Numeric, Mandatory, > 0
+       internodeSpacing: Numeric, Mandatory, > 0
+       fruitVolumeM2: Output Field: Numeric
+       winterBudVolume: Output Field: Numeric
+       caneSpacing: Output Field: Numeric
+   Associations:
+       winterBudCalculators: association to single entity WinterBudCalculators
+Entity "CalculatorB"
+   Properties:
+       winterBudVolume: Numeric, Key, Mandatory, > 0
+       flowersPerBud: Numeric, Mandatory, > 0
+       orchardThinRejectPerc: Numeric, Mandatory, Range: 1–100%
+       packoutRejectPerc: Numeric, Mandatory, Range: 1–100%
+       unproductivePerc: Numeric, Mandatory, Range: 1–100%
+       averageSize: Numeric, Mandatory, Range: 16–49
+       fruitVolumeM2: Output Field: Numeric
+       targetClass1Trays: Output Field: Numeric
+   Associations:
+       winterBudCalculators: association to single entity WinterBudCalculators
+
+The user input below describes the details of the ListReport page (i.e. its filters, tables or views with their columns).
+
+Your task is to help the user defining the ListReport page.
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "loadDataOnAppLaunch": {
+      "type": "string",
+      "enum": [
+        "Auto",
+        "Disabled",
+        "Enabled"
+      ],
+      "description": "'Auto': no explicit user input to load the data after start or an explicit user input to set InitialLoad for table to Auto; 'Disabled': An initial load of data does not occur at app start and the user has to actively click the Go button;  'Enabled': An initial load of data occurs automatically after start  (list is visible without pressing the GO Button)."
+    },
+    "tables": {
+      "type": "array",
+      "description": "tables (views) expected in user input",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "baseEntityType": {
+            "type": "string",
+            "description": "base entity type for the table"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "propertyPaths for columns"
+          }
+        },
+        "required": [
+          "title",
+          "baseEntityType",
+          "columns"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "filters": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "propertyPaths for filters specified in user input. If not specified, empty array"
+    }
+  },
+  "required": [
+    "tables"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+<UserInput>
+I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:
+"Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B."
+Winter Bud Calculators:
+Fields:
+"Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume."
+Processing Logic:
+</UserInput>
+
+----------Response:----------
+```json
+{
+  "loadDataOnAppLaunch": "Enabled",
+  "tables": [
+    {
+      "title": "Winter Bud Calculators",
+      "id": "WinterBudCalculatorsTable",
+      "baseEntityType": "WinterBudCalculators",
+      "columns": [
+        "name"
+      ]
+    }
+  ],
+  "filters": [
+    "calculatorA/targetClass1Trays",
+    "calculatorA/averageSize",
+    "calculatorA/orchardThinRejectPerc",
+    "calculatorA/packoutRejectPerc",
+    "calculatorA/unproductivePerc",
+    "calculatorA/flowersPerBud",
+    "calculatorA/internodeSpacing",
+    "calculatorA/winterBudVolume"
+  ]
+}
+```
+2025-07-10T07:29:01.723Z [info] Step "loopOverPages" index 1: pageType=ObjectPage, entityType=WinterBudCalculators
+2025-07-10T07:29:01.723Z [info] Step "ifListReportPage": case 0 blocked! Evaluation details:
+ - Variable "pageType" : "ObjectPage"
+2025-07-10T07:29:01.723Z [info] Step "ifListReportPage": no condition met - running default steps
+2025-07-10T07:29:01.723Z [info] Step "extractSingleObjectPageOfMany" SKIPPED: no user input after filter
+2025-07-10T07:29:01.724Z [info] Step "loopOverPages" index 2: pageType=ObjectPage, entityType=CalculatorA
+2025-07-10T07:29:01.724Z [info] Step "ifListReportPage": case 0 blocked! Evaluation details:
+ - Variable "pageType" : "ObjectPage"
+2025-07-10T07:29:01.724Z [info] Step "ifListReportPage": no condition met - running default steps
+2025-07-10T07:29:07.466Z [info] 
+==========LLM call for step "extractSingleObjectPageOfMany":==========
+The user input below describes a Fiori Elements Application with the following pages:
+ - ListReport page for "WinterBudCalculators"
+ - ObjectPage for "WinterBudCalculators"
+ - ObjectPage for "CalculatorA"
+ - ObjectPage for "CalculatorB"
+
+Your task is to find the details of the ObjectPage for "CalculatorA".
+The base entity of the ObjectPage is WinterBudCalculators.
+This ObjectPage can contain tabs and/or sections which in turn contain tables and fields.
+It must contain table sections containing data for:
+ - associated entity "CalculatorA" (via association calculatorA)
+ - associated entity "CalculatorB" (via association calculatorB);
+
+The underlying data model allows the following propertyPaths:
+ - targetClass1Trays: Target Class1 Trays (of Calculator A)
+ - averageSize: Average Size (of Calculator A)
+ - orchardThinRejectPerc: Orchard Thin Reject Perc (of Calculator A)
+ - packoutRejectPerc: Packout Reject Perc (of Calculator A)
+ - unproductivePerc: Unproductive Perc (of Calculator A)
+ - flowersPerBud: Flowers Per Bud (of Calculator A)
+ - internodeSpacing: Internode Spacing (of Calculator A)
+ - fruitVolumeM2: Fruit Volume M2 (of Calculator A)
+ - winterBudVolume: Winter Bud Volume (of Calculator A)
+ - caneSpacing: Cane Spacing (of Calculator A)
+ - winterBudCalculators/name: Name (of single associated Winter Bud Calculator)
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isTableSection": {
+            "type": "boolean",
+            "description": "if true, 'fields' represent columns of the table section and propertyPaths need to start with 1:n association"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "propertyPath"
+          }
+        },
+        "required": [
+          "title",
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tabs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "subsections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "list of sections ids relevant for the tab"
+          }
+        },
+        "required": [
+          "title",
+          "id",
+          "subsections"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "sections",
+    "tabs"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+<UserInput>
+"Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),"
+"Average_size (Numeric, Mandatory, Range: 16–49),"
+"Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),"
+"Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),"
+"Unproductive_perc (Numeric, Mandatory, Range: 1–100%),"
+"Flowers_per_bud (Numeric, Mandatory, &gt; 0),"
+"Internode_spacing (Numeric, Mandatory, &gt; 0)."
+Output Fields:
+"Fruit_volume_m2 (Numeric),"
+"Winter_bud_volume (Numeric),"
+Cane_spacing (Numeric).
+Calculator A:
+1. Calculate `Fruit_volume_m2`:
+```
+"Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000"
+```
+2. Calculate `Winter_bud_volume`:
+```
+Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud
+```
+3. Calculate `Cane_spacing`:
+```
+"Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000"
+```
+</UserInput>
+
+----------Response:----------
+```json
+{
+  "sections": [
+    {
+      "title": "Calculator A Data",
+      "id": "calculatorAData",
+      "isTableSection": true,
+      "fields": [
+        "calculatorA/targetClass1Trays",
+        "calculatorA/averageSize",
+        "calculatorA/orchardThinRejectPerc",
+        "calculatorA/packoutRejectPerc",
+        "calculatorA/unproductivePerc",
+        "calculatorA/flowersPerBud",
+        "calculatorA/internodeSpacing",
+        "calculatorA/fruitVolumeM2",
+        "calculatorA/winterBudVolume",
+        "calculatorA/caneSpacing"
+      ]
+    },
+    {
+      "title": "Calculator B Data",
+      "id": "calculatorBData",
+      "isTableSection": true,
+      "fields": [
+        "calculatorB/targetClass1Trays",
+        "calculatorB/averageSize",
+        "calculatorB/orchardThinRejectPerc",
+        "calculatorB/packoutRejectPerc",
+        "calculatorB/unproductivePerc",
+        "calculatorB/flowersPerBud",
+        "calculatorB/internodeSpacing",
+        "calculatorB/fruitVolumeM2",
+        "calculatorB/winterBudVolume",
+        "calculatorB/caneSpacing"
+      ]
+    }
+  ],
+  "tabs": [
+    {
+      "title": "Calculator A Overview",
+      "id": "calculatorAOverview",
+      "subsections": [
+        "calculatorAData"
+      ]
+    },
+    {
+      "title": "Calculator B Overview",
+      "id": "calculatorBOverview",
+      "subsections": [
+        "calculatorBData"
+      ]
+    }
+  ]
+}
+```
+2025-07-10T07:29:07.467Z [info] Step "loopOverPages" index 3: pageType=ObjectPage, entityType=CalculatorB
+2025-07-10T07:29:07.467Z [info] Step "ifListReportPage": case 0 blocked! Evaluation details:
+ - Variable "pageType" : "ObjectPage"
+2025-07-10T07:29:07.468Z [info] Step "ifListReportPage": no condition met - running default steps
+2025-07-10T07:29:12.836Z [info] 
+==========LLM call for step "extractSingleObjectPageOfMany":==========
+The user input below describes a Fiori Elements Application with the following pages:
+ - ListReport page for "WinterBudCalculators"
+ - ObjectPage for "WinterBudCalculators"
+ - ObjectPage for "CalculatorA"
+ - ObjectPage for "CalculatorB"
+
+Your task is to find the details of the ObjectPage for "CalculatorB".
+The base entity of the ObjectPage is WinterBudCalculators.
+This ObjectPage can contain tabs and/or sections which in turn contain tables and fields.
+It must contain table sections containing data for:
+ - associated entity "CalculatorA" (via association calculatorA)
+ - associated entity "CalculatorB" (via association calculatorB);
+
+The underlying data model allows the following propertyPaths:
+ - winterBudVolume: Winter Bud Volume (of Calculator B)
+ - flowersPerBud: Flowers Per Bud (of Calculator B)
+ - orchardThinRejectPerc: Orchard Thin Reject Perc (of Calculator B)
+ - packoutRejectPerc: Packout Reject Perc (of Calculator B)
+ - unproductivePerc: Unproductive Perc (of Calculator B)
+ - averageSize: Average Size (of Calculator B)
+ - fruitVolumeM2: Fruit Volume M2 (of Calculator B)
+ - targetClass1Trays: Target Class1 Trays (of Calculator B)
+ - winterBudCalculators/name: Name (of single associated Winter Bud Calculator)
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "isTableSection": {
+            "type": "boolean",
+            "description": "if true, 'fields' represent columns of the table section and propertyPaths need to start with 1:n association"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "propertyPath"
+          }
+        },
+        "required": [
+          "title",
+          "id",
+          "fields"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "tabs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "subsections": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "list of sections ids relevant for the tab"
+          }
+        },
+        "required": [
+          "title",
+          "id",
+          "subsections"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "sections",
+    "tabs"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+<UserInput>
+"Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),"
+"Flowers_per_bud (Numeric, Mandatory, &gt; 0),"
+"Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),"
+"Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),"
+"Unproductive_perc (Numeric, Mandatory, Range: 1–100%),"
+"Average_size (Numeric, Mandatory, Range: 16–49)."
+Output Fields:
+"Fruit_volume_m2 (Numeric),"
+Target_class1_trays (Numeric).
+Calculator B:
+1. Calculate `Fruit_volume_m2`:
+```
+Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud
+```
+2. Calculate `Target_class1_trays`:
+```
+"Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000"
+```
+"Additionally, I need the ability to create, update, and delete functionality."
+Error Handling:
+- Use `req.error()` or `req.reject()` for invalid inputs.
+- Example error messages:
+- \"Please enter Target Class 1 trays.\"
+"- \"Target Class 1 trays should be between 1 and 30,000.\""
+- \"Average size must be between 16 and 49.\"
+- \"Winter bud volume must be greater than 0.\"
+- Implement try-catch blocks for API calls and database operations.
+- Sample error handling:
+```
+try {
+const result = await executeCalculator();
+} catch (error) {
+"req.error(500, \"Calculation failed. Please check your inputs.\");"
+}
+```
+</UserInput>
+
+----------Response:----------
+```json
+{
+  "sections": [
+    {
+      "title": "Calculator A Data",
+      "id": "calculatorAData",
+      "isTableSection": true,
+      "fields": [
+        "calculatorA/winterBudVolume",
+        "calculatorA/flowersPerBud",
+        "calculatorA/orchardThinRejectPerc",
+        "calculatorA/packoutRejectPerc",
+        "calculatorA/unproductivePerc",
+        "calculatorA/averageSize",
+        "calculatorA/fruitVolumeM2",
+        "calculatorA/targetClass1Trays"
+      ]
+    },
+    {
+      "title": "Calculator B Data",
+      "id": "calculatorBData",
+      "isTableSection": true,
+      "fields": [
+        "calculatorB/winterBudVolume",
+        "calculatorB/flowersPerBud",
+        "calculatorB/orchardThinRejectPerc",
+        "calculatorB/packoutRejectPerc",
+        "calculatorB/unproductivePerc",
+        "calculatorB/averageSize",
+        "calculatorB/fruitVolumeM2",
+        "calculatorB/targetClass1Trays"
+      ]
+    }
+  ],
+  "tabs": [
+    {
+      "title": "Calculator A",
+      "id": "calculatorATab",
+      "subsections": [
+        "calculatorAData"
+      ]
+    },
+    {
+      "title": "Calculator B",
+      "id": "calculatorBTab",
+      "subsections": [
+        "calculatorBData"
+      ]
+    }
+  ]
+}
+```
+2025-07-10T07:29:12.837Z [info] Step "ifCodeListsPresent": case 0 passed! Evaluation details:
+ - JSONPath "$.model.entities[*].elements[*].values[*]" : ["1","30000","16","49","1%","100%","1%","100%","1%","100%","1%","100%","1%","100%","1%","100%","16","49"]
+2025-07-10T07:29:25.222Z [info] 
+==========LLM call for step "extractColors":==========
+You help the user creating a Fiori Elements application based on user input describing such an application.
+Your task is to determine whether the entity properties can be considered good and bad in most contexts or are usually neutral. When in doubt, set to neutral.
+
+These are the entity properties and their values:
+Entity: CalculatorA, Property: targetClass1Trays, Values: 1, 30000
+Entity: CalculatorA, Property: averageSize, Values: 16, 49
+Entity: CalculatorA, Property: orchardThinRejectPerc, Values: 1%, 100%
+Entity: CalculatorA, Property: packoutRejectPerc, Values: 1%, 100%
+Entity: CalculatorA, Property: unproductivePerc, Values: 1%, 100%
+Entity: CalculatorB, Property: orchardThinRejectPerc, Values: 1%, 100%
+Entity: CalculatorB, Property: packoutRejectPerc, Values: 1%, 100%
+Entity: CalculatorB, Property: unproductivePerc, Values: 1%, 100%
+Entity: CalculatorB, Property: averageSize, Values: 16, 49
+
+If the properties can be considered good and bad, the allowed values for their criticality and the associated colors are:
+   negative: red
+   critical: yellow or orange
+   positive: green
+   neutral:  grey
+
+You must format your output as a JSON value that adheres to a given "JSON Schema" instance.
+
+"JSON Schema" is a declarative language that allows you to annotate and validate JSON documents.
+
+For example, the example "JSON Schema" instance {{"properties": {{"foo": {{"description": "a list of test words", "type": "array", "items": {{"type": "string"}}}}}}, "required": ["foo"]}}
+would match an object with one required property, "foo". The "type" property specifies "foo" must be an "array", and the "description" property semantically describes it as "a list of test words". The items within "foo" must be strings.
+Thus, the object {{"foo": ["bar", "baz"]}} is a well-formatted instance of this example "JSON Schema". The object {{"properties": {{"foo": ["bar", "baz"]}}}} is not well-formatted.
+
+Your output will be parsed and type-checked according to the provided schema instance, so make sure all fields in your output match the schema exactly and there are no trailing commas!
+
+Here is the JSON Schema instance your output must adhere to. Include the enclosing markdown codeblock:
+```json
+{
+  "type": "object",
+  "properties": {
+    "properties": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "entity": {
+            "type": "string"
+          },
+          "property": {
+            "type": "string"
+          },
+          "hasColorsOrCriticality": {
+            "type": "boolean",
+            "description": "true if the given values of the property can be good or bad, false if they are usually neutral"
+          },
+          "reason": {
+            "type": "string",
+            "description": "detailed explanation why you set hasColorsOrCriticality to this value"
+          },
+          "mapping": {
+            "type": "array",
+            "description": "empty if 'hasColorsOrCriticality' is false",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "value of property"
+                },
+                "colorOrCriticality": {
+                  "type": "string",
+                  "description": "color or criticality associated with value"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "detailed explanation why you set ColorOrCriticality to this value"
+                }
+              },
+              "required": [
+                "value",
+                "colorOrCriticality"
+              ]
+            }
+          }
+        },
+        "required": [
+          "entity",
+          "property"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "properties"
+  ],
+  "additionalProperties": false
+}
+```
+
+Output ONLY the json contents and try to be as accurate as comprehensive as possible.
+
+<UserInput>
+    I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:  
+    Description: As a user, I need to calculate Winter Bud volumes and Cane Spacing using Calculator A, and Production yield (Class 1 trays) using Calculator B.  
+    Winter Bud Calculators:  
+    Fields:  
+    Calculator A:  
+    Target_class1_trays (Numeric, Key, Mandatory, Range: 1–30,000),  
+    Average_size (Numeric, Mandatory, Range: 16–49),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Internode_spacing (Numeric, Mandatory, &gt; 0).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Winter_bud_volume (Numeric),  
+    Cane_spacing (Numeric).  
+
+    Calculator B:  
+    Winter_bud_volume (Numeric, Key, Mandatory, &gt; 0),  
+    Flowers_per_bud (Numeric, Mandatory, &gt; 0),  
+    Orchard_thin_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Packout_reject_perc (Numeric, Mandatory, Range: 1–100%),  
+    Unproductive_perc (Numeric, Mandatory, Range: 1–100%),  
+    Average_size (Numeric, Mandatory, Range: 16–49).  
+    Output Fields:  
+    Fruit_volume_m2 (Numeric),  
+    Target_class1_trays (Numeric).  
+
+    Selection Fields: Target_class1_trays, Average_size, Orchard_thin_reject_perc, Packout_reject_perc, Unproductive_perc, Flowers_per_bud, Internode_spacing, Winter_bud_volume. 
+
+Processing Logic:  
+    Calculator A:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Target_class1_trays / ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) * Average_size / 10,000  
+        ```  
+    2. Calculate `Winter_bud_volume`:  
+        ```  
+        Winter_bud_volume = Fruit_volume_m2 / Flowers_per_bud  
+        ```  
+    3. Calculate `Cane_spacing`:  
+        ```  
+        Cane_spacing = (1 / Winter_bud_volume) * Internode_spacing * 1,000,000  
+        ```  
+
+    Calculator B:  
+    1. Calculate `Fruit_volume_m2`:  
+        ```  
+        Fruit_volume_m2 = Winter_bud_volume * Flowers_per_bud  
+        ```  
+    2. Calculate `Target_class1_trays`:  
+        ```  
+        Target_class1_trays = Fruit_volume_m2 * ((1 - Unproductive_perc) * (1 - (Orchard_thin_reject_perc + Packout_reject_perc))) / Average_size * 10,000  
+        ```  
+
+    Additionally, I need the ability to create, update, and delete functionality.  
+    Error Handling:  
+    - Use `req.error()` or `req.reject()` for invalid inputs.  
+    - Example error messages:  
+        - "Please enter Target Class 1 trays."  
+        - "Target Class 1 trays should be between 1 and 30,000."  
+        - "Average size must be between 16 and 49."  
+        - "Winter bud volume must be greater than 0."  
+    - Implement try-catch blocks for API calls and database operations.  
+    - Sample error handling:  
+        ```  
+        try {  
+            const result = await executeCalculator();  
+        } catch (error) {  
+            req.error(500, "Calculation failed. Please check your inputs.");  
+        }  
+        ```
+</UserInput>
+
+
+----------Response:----------
+```json
+{
+  "properties": [
+    {
+      "entity": "CalculatorA",
+      "property": "targetClass1Trays",
+      "hasColorsOrCriticality": true,
+      "reason": "The number of trays can be considered good or bad depending on the target production goals.",
+      "mapping": [
+        {
+          "value": "1",
+          "colorOrCriticality": "negative",
+          "reason": "A value of 1 is likely too low for production goals."
+        },
+        {
+          "value": "30000",
+          "colorOrCriticality": "positive",
+          "reason": "A value of 30000 is likely to meet or exceed production goals."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorA",
+      "property": "averageSize",
+      "hasColorsOrCriticality": false,
+      "reason": "Average size is typically a neutral value as it depends on the context of the calculation."
+    },
+    {
+      "entity": "CalculatorA",
+      "property": "orchardThinRejectPerc",
+      "hasColorsOrCriticality": true,
+      "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+      "mapping": [
+        {
+          "value": "1%",
+          "colorOrCriticality": "positive",
+          "reason": "A low reject percentage is favorable."
+        },
+        {
+          "value": "100%",
+          "colorOrCriticality": "negative",
+          "reason": "A high reject percentage is unfavorable."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorA",
+      "property": "packoutRejectPerc",
+      "hasColorsOrCriticality": true,
+      "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+      "mapping": [
+        {
+          "value": "1%",
+          "colorOrCriticality": "positive",
+          "reason": "A low reject percentage is favorable."
+        },
+        {
+          "value": "100%",
+          "colorOrCriticality": "negative",
+          "reason": "A high reject percentage is unfavorable."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorA",
+      "property": "unproductivePerc",
+      "hasColorsOrCriticality": true,
+      "reason": "A high unproductive percentage is generally negative as it indicates inefficiency.",
+      "mapping": [
+        {
+          "value": "1%",
+          "colorOrCriticality": "positive",
+          "reason": "A low unproductive percentage is favorable."
+        },
+        {
+          "value": "100%",
+          "colorOrCriticality": "negative",
+          "reason": "A high unproductive percentage is unfavorable."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorB",
+      "property": "orchardThinRejectPerc",
+      "hasColorsOrCriticality": true,
+      "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+      "mapping": [
+        {
+          "value": "1%",
+          "colorOrCriticality": "positive",
+          "reason": "A low reject percentage is favorable."
+        },
+        {
+          "value": "100%",
+          "colorOrCriticality": "negative",
+          "reason": "A high reject percentage is unfavorable."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorB",
+      "property": "packoutRejectPerc",
+      "hasColorsOrCriticality": true,
+      "reason": "A high reject percentage is generally negative as it indicates a high level of waste.",
+      "mapping": [
+        {
+          "value": "1%",
+          "colorOrCriticality": "positive",
+          "reason": "A low reject percentage is favorable."
+        },
+        {
+          "value": "100%",
+          "colorOrCriticality": "negative",
+          "reason": "A high reject percentage is unfavorable."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorB",
+      "property": "unproductivePerc",
+      "hasColorsOrCriticality": true,
+      "reason": "A high unproductive percentage is generally negative as it indicates inefficiency.",
+      "mapping": [
+        {
+          "value": "1%",
+          "colorOrCriticality": "positive",
+          "reason": "A low unproductive percentage is favorable."
+        },
+        {
+          "value": "100%",
+          "colorOrCriticality": "negative",
+          "reason": "A high unproductive percentage is unfavorable."
+        }
+      ]
+    },
+    {
+      "entity": "CalculatorB",
+      "property": "averageSize",
+      "hasColorsOrCriticality": false,
+      "reason": "Average size is typically a neutral value as it depends on the context of the calculation."
+    }
+  ]
+}
+```
+2025-07-10T07:29:25.224Z [info] 2/8: Build CDS files
+2025-07-10T07:29:25.237Z [info] 3/8: Checking staging project root folder "&#x2F;home&#x2F;user&#x2F;projects&#x2F;WinterBudCalculator2ndPrompt"
+2025-07-10T07:29:25.469Z [info] 4/8: Generating mock data
+2025-07-10T07:29:33.054Z [info] 
+==========LLM call for data generation:==========
+
+For the following list of entities, create data for the empty CSV files.
+Entity "WinterBudCalculators" - Properties:
+    name: String(50), Name of Winter Bud Calculator
+
+Entity "CalculatorA" - Properties:
+    targetClass1Trays: String(50), Numeric, Key, Mandatory, Range: 1–30,000
+    averageSize: String(50), Numeric, Mandatory, Range: 16–49
+    orchardThinRejectPerc: String(50), Numeric, Mandatory, Range: 1–100%
+    packoutRejectPerc: String(50), Numeric, Mandatory, Range: 1–100%
+    unproductivePerc: String(50), Numeric, Mandatory, Range: 1–100%
+    flowersPerBud: Integer, Numeric, Mandatory, > 0
+    internodeSpacing: Decimal, Numeric, Mandatory, > 0
+    fruitVolumeM2: Decimal, Output Field: Numeric
+    winterBudVolume: Decimal, Output Field: Numeric
+    caneSpacing: Decimal, Output Field: Numeric
+    winterBudCalculators_name: String(50), name of associated WinterBudCalculators
+
+Entity "CalculatorB" - Properties:
+    winterBudVolume: Decimal, Numeric, Key, Mandatory, > 0
+    flowersPerBud: Integer, Numeric, Mandatory, > 0
+    orchardThinRejectPerc: String(50), Numeric, Mandatory, Range: 1–100%
+    packoutRejectPerc: String(50), Numeric, Mandatory, Range: 1–100%
+    unproductivePerc: String(50), Numeric, Mandatory, Range: 1–100%
+    averageSize: String(50), Numeric, Mandatory, Range: 16–49
+    fruitVolumeM2: Decimal, Output Field: Numeric
+    targetClass1Trays: Integer, Output Field: Numeric
+    winterBudCalculators_name: String(50), name of associated WinterBudCalculators
+
+Empty CSV files in json format (only generate content for these files!):
+{"WinterBudCalculators.csv":"name","CalculatorA.csv":"targetClass1Trays;averageSize;orchardThinRejectPerc;packoutRejectPerc;unproductivePerc;flowersPerBud;internodeSpacing;fruitVolumeM2;winterBudVolume;caneSpacing;winterBudCalculators_name","CalculatorB.csv":"winterBudVolume;flowersPerBud;orchardThinRejectPerc;packoutRejectPerc;unproductivePerc;averageSize;fruitVolumeM2;targetClass1Trays;winterBudCalculators_name"}
+
+Rules:
+    - Take over the given header line, do not invent new columns!
+    - For a given file, add rows, add '\n' characters before each row but don't break the JSON string
+    - Do not generate rows with same key values, they must be unique!
+    - Make sure that associations match, i.e. a field containing "Name of the associated Customer" must contain an existing Name of entity Customer
+    - Always use ";" as a delimiter in CSV files
+    - The result must be proper JSON format so it can be parsed, don't break JSON strings within, don't add quotes around values.
+    - Create about 5 rows for the first csv, 7 for the second and so on
+    - All values must be realistic with meaningful content, e.g. 'Laptop Screen' and not just placeholder values with incremented numbers like 'Product 1', 'Product 2' etc.
+    
+Use format for values:
+  String(50): string no longer than 50 characters
+  Integer, Double: only numbers, no special symbols
+  Decimal(3,2): 1.23
+    
+
+Example output (Do NOT include in output!):
+```json
+{"Blogs":"blogID;title;description;createdDateTime;views\nBlog1;Tech Blog;A blog about the latest technology trends.;2023-06-27T14:52:23Z;1000\nBlog2;Fashion Blog;Explore the world of fashion and style.;2023-06-27T14:52:23Z;500","Posts":"postID;title;content;publishDate;likes;comments;blogID\n1;The Future of Artificial Intelligence;Artificial intelligence is shaping the future of technology.;2023-06-27;50;10;Blog1
+2;Summer Fashion Trends;Discover the hottest fashion trends for the summer season.;2023-06-27;100;20;Blog2\n3;Must-Have Accessories;10 must-have accessories for the upcoming season;2023-06-27;100;20;Blog2"}
+```
+Output ONLY the json contents for the csv files and try to be as accurate as possible.    
+
+
+
+----------Response:----------
+```json
+{"WinterBudCalculators.csv":"name\nWinter Bud Pro\nFrostGuard 3000\nChillMaster\nBudWizard\nIceShield\n","CalculatorA.csv":"targetClass1Trays;averageSize;orchardThinRejectPerc;packoutRejectPerc;unproductivePerc;flowersPerBud;internodeSpacing;fruitVolumeM2;winterBudVolume;caneSpacing;winterBudCalculators_name\n15000;32;10%;5%;8%;3;1.25;0.00;0.00;0.00;Winter Bud Pro\n25000;28;15%;10%;12%;4;1.50;0.00;0.00;0.00;FrostGuard 3000\n30000;35;20%;8%;10%;5;1.75;0.00;0.00;0.00;ChillMaster\n18000;30;12%;7%;9%;6;1.30;0.00;0.00;0.00;BudWizard\n22000;29;18%;6%;11%;7;1.60;0.00;0.00;0.00;IceShield\n27000;34;14%;9%;13%;8;1.45;0.00;0.00;0.00;Winter Bud Pro\n20000;31;16%;11%;14%;9;1.55;0.00;0.00;0.00;FrostGuard 3000\n","CalculatorB.csv":"winterBudVolume;flowersPerBud;orchardThinRejectPerc;packoutRejectPerc;unproductivePerc;averageSize;fruitVolumeM2;targetClass1Trays;winterBudCalculators_name\n1.50;3;10%;5%;8%;32;0.00;0;Winter Bud Pro\n1.75;4;15%;10%;12%;28;0.00;0;FrostGuard 3000\n2.00;5;20%;8%;10%;35;0.00;0;ChillMaster\n1.60;6;12%;7%;9%;30;0.00;0;BudWizard\n1.80;7;18%;6%;11%;29;0.00;0;IceShield\n1.55;8;14%;9%;13%;34;0.00;0;Winter Bud Pro\n1.65;9;16%;11%;14%;31;0.00;0;FrostGuard 3000\n"}
+```
+2025-07-10T07:29:33.057Z [info] 5/8: Initializing CAP project
+2025-07-10T07:29:33.427Z [info] 6/8: Copying files to CAP project
+2025-07-10T07:29:33.459Z [info] 7/8: Generating applications
+2025-07-10T07:30:22.071Z [info] 8/8: Installing node module dependencies

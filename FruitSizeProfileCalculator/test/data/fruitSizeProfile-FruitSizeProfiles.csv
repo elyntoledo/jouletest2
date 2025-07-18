@@ -1,0 +1,6 @@
+ID;country_code;cultivar_code;fruitSizeWeightBand;totalFruitPieces;averageFruitSize;cropFruitSizeProfileGraph
+f2f78293-b8db-407e-8752-3a43cadb4fcf;NewZealand;Gold3;1.25;100;1.25;Graph1
+bba7f48b-a9b6-48fb-a5d2-4b090e8c1bd8;France;Hayward;1.50;120;1.50;Graph2
+7c7f48a1-108f-475e-a1dc-3993e6af03c1;Italy;Red19;1.75;110;1.75;Graph3
+3f09788f-f1a7-4edd-84be-300a2ccde77f;SouthKorea;Gold3;1.30;130;1.30;Graph4
+505b137e-a623-4817-ba7d-27b3e87b6b65;Japan;Hayward;1.60;140;1.60;Graph5

@@ -1,0 +1,31 @@
+{
+    "version": "0.2",
+    "floorplan": "FE_LROP",
+    "project": {
+        "name": "thinningcalculatorapp",
+        "targetFolder": "/home/user/projects/ThinningCalculator2ndPrompt",
+        "title": "AI generated App thinningcalculatorapp",
+        "description": "AI generated App thinningcalculatorapp",
+        "ui5Version": "1.136.0",
+        "localUI5Version": "1.82.2",
+        "sapux": true
+    },
+    "service": {
+        "servicePath": "/odata/v4/thinning-calculator-srv/",
+        "capService": {
+            "projectPath": "/home/user/projects/ThinningCalculator2ndPrompt",
+            "serviceName": "thinningCalculatorSrv",
+            "serviceCdsPath": "srv/service"
+        }
+    },
+    "entityConfig": {
+        "mainEntity": {
+            "entityName": "ThinningCalculations"
+        }
+    },
+    "projectType": "LIST_REPORT_OBJECT_PAGE",
+    "telemetryData": {
+        "generationSourceName": "AI Headless",
+        "generationSourceVersion": "1.18.2"
+    }
+}

@@ -1,0 +1,134 @@
+{
+    "_version": "1.65.0",
+    "sap.app": {
+        "id": "thinningcalculatorapp",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "@sap/generator-fiori:lrop",
+            "version": "1.18.2",
+            "toolsId": "b3efcf04-ad6d-480c-8a51-a268ff6ad8d2"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/odata/v4/thinning-calculator-srv/",
+                "type": "OData",
+                "settings": {
+                    "annotations": [],
+                    "odataVersion": "4.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.136.0",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "thinningcalculatorapp.i18n.i18n"
+                }
+            },
+            "": {
+                "dataSource": "mainService",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "autoExpandSelect": true,
+                    "earlyRequests": true
+                }
+            },
+            "@i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "uri": "i18n/i18n.properties"
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "ThinningCalculationsList",
+                    "target": "ThinningCalculationsList"
+                },
+                {
+                    "pattern": "ThinningCalculations({key}):?query:",
+                    "name": "ThinningCalculationsObjectPage",
+                    "target": "ThinningCalculationsObjectPage"
+                }
+            ],
+            "targets": {
+                "ThinningCalculationsList": {
+                    "type": "Component",
+                    "id": "ThinningCalculationsList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/ThinningCalculations",
+                            "variantManagement": "Page",
+                            "initialLoad": "Enabled",
+                            "navigation": {
+                                "ThinningCalculations": {
+                                    "detail": {
+                                        "route": "ThinningCalculationsObjectPage"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ThinningCalculationsObjectPage": {
+                    "type": "Component",
+                    "id": "ThinningCalculationsObjectPage",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings": {
+                            "contextPath": "/ThinningCalculations"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "sap.fiori": {
+        "registrationIds": [],
+        "archeType": "transactional"
+    }
+}

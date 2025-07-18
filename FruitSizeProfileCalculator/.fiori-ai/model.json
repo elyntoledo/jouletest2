@@ -1,0 +1,226 @@
+{
+    "namespace": "fruitSizeProfile",
+    "entities": [
+        {
+            "name": "FruitSizeProfiles",
+            "label": "Fruit Size Profile",
+            "associations": [
+                {
+                    "name": "freshFruitWeightSamples",
+                    "target": "FreshFruitWeightSamples",
+                    "multiplicity": "many",
+                    "backAssociation": "fruitSizeProfiles"
+                }
+            ],
+            "labelPlural": "Fruit Size Profiles",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "country",
+                    "type": "String(50)",
+                    "label": "Country",
+                    "additionalInfo": "Dropdown: New Zealand, France, Italy, South Korea, Japan, Mandatory",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "New Zealand",
+                        "France",
+                        "Italy",
+                        "South Korea",
+                        "Japan"
+                    ],
+                    "hasFixedValuesList": true,
+                    "hasColorsOrCriticality": false,
+                    "reason": "The property 'country' represents geographical locations which are usually neutral and do not inherently have positive or negative connotations.",
+                    "mapping": []
+                },
+                {
+                    "name": "cultivar",
+                    "type": "String(50)",
+                    "label": "Cultivar",
+                    "additionalInfo": "Dropdown: Gold3, Hayward, Red19, Mandatory",
+                    "key": false,
+                    "essentialElement": true,
+                    "values": [
+                        "Gold3",
+                        "Hayward",
+                        "Red19"
+                    ],
+                    "hasFixedValuesList": true,
+                    "hasColorsOrCriticality": false,
+                    "reason": "The property 'cultivar' represents different types of fruit varieties which are usually neutral and do not inherently have positive or negative connotations.",
+                    "mapping": []
+                },
+                {
+                    "name": "fruitSizeWeightBand",
+                    "type": "Decimal",
+                    "label": "Fruit Size Weight Band",
+                    "additionalInfo": "Calculated, Numeric",
+                    "key": false,
+                    "essentialElement": false
+                },
+                {
+                    "name": "totalFruitPieces",
+                    "type": "Integer",
+                    "label": "Total Fruit Pieces",
+                    "additionalInfo": "Calculated, Numeric",
+                    "key": false,
+                    "essentialElement": false
+                },
+                {
+                    "name": "averageFruitSize",
+                    "type": "Decimal",
+                    "label": "Average Fruit Size",
+                    "additionalInfo": "Calculated, Numeric",
+                    "key": false,
+                    "essentialElement": false
+                },
+                {
+                    "name": "cropFruitSizeProfileGraph",
+                    "type": "String(50)",
+                    "label": "Crop Fruit Size Profile Graph",
+                    "additionalInfo": "Calculated, Graph",
+                    "key": false,
+                    "essentialElement": false
+                }
+            ]
+        },
+        {
+            "name": "FreshFruitWeightSamples",
+            "label": "Fresh Fruit Weight Sample",
+            "associations": [
+                {
+                    "name": "fruitSizeProfiles",
+                    "target": "FruitSizeProfiles",
+                    "multiplicity": "one",
+                    "isComposition": false
+                }
+            ],
+            "labelPlural": "Fresh Fruit Weight Samples",
+            "elements": [
+                {
+                    "name": "ID",
+                    "type": "UUID",
+                    "key": true,
+                    "label": ""
+                },
+                {
+                    "name": "freshFruitWeightSamples",
+                    "type": "String(255)",
+                    "label": "Fresh Fruit Weight Samples",
+                    "additionalInfo": "Comma-separated or list of fruit weights in grams, Mandatory",
+                    "key": false,
+                    "essentialElement": true
+                },
+                {
+                    "name": "averageFreshFruitWeight",
+                    "type": "Decimal",
+                    "label": "Average Fresh Fruit Weight",
+                    "additionalInfo": "Calculated, Numeric",
+                    "key": false,
+                    "essentialElement": false
+                }
+            ]
+        }
+    ],
+    "service": {
+        "name": "fruitSizeProfileSrv",
+        "path": "srv/service.cds"
+    },
+    "applications": [
+        {
+            "pages": [
+                {
+                    "type": "ListReport",
+                    "entityType": "FruitSizeProfiles",
+                    "listReportContent": {
+                        "loadDataOnAppLaunch": "Enabled",
+                        "tables": [
+                            {
+                                "title": "Fruit Size Profiles",
+                                "id": "fruitSizeProfilesTable",
+                                "baseEntityType": "FruitSizeProfiles",
+                                "columns": [
+                                    "country",
+                                    "cultivar",
+                                    "fruitSizeWeightBand",
+                                    "totalFruitPieces",
+                                    "averageFruitSize",
+                                    "cropFruitSizeProfileGraph"
+                                ]
+                            }
+                        ],
+                        "filters": [
+                            "country",
+                            "cultivar"
+                        ]
+                    }
+                },
+                {
+                    "type": "ObjectPage",
+                    "entityType": "FruitSizeProfiles",
+                    "objectPageContent": {
+                        "tableSectionAssociations": [
+                            "freshFruitWeightSamples"
+                        ],
+                        "sections": [
+                            {
+                                "title": "Fruit Size Profile Details",
+                                "id": "fruitSizeProfileDetails",
+                                "isTableSection": false,
+                                "fields": [
+                                    "country",
+                                    "cultivar",
+                                    "fruitSizeWeightBand",
+                                    "totalFruitPieces",
+                                    "averageFruitSize",
+                                    "cropFruitSizeProfileGraph"
+                                ]
+                            },
+                            {
+                                "title": "Fresh Fruit Weight Samples",
+                                "id": "freshFruitWeightSamplesSection",
+                                "isTableSection": true,
+                                "fields": [
+                                    "freshFruitWeightSamples/freshFruitWeightSamples",
+                                    "freshFruitWeightSamples/averageFreshFruitWeight"
+                                ]
+                            }
+                        ],
+                        "tabs": [
+                            {
+                                "title": "Overview",
+                                "id": "overviewTab",
+                                "subsections": [
+                                    "fruitSizeProfileDetails"
+                                ]
+                            },
+                            {
+                                "title": "Weight Samples",
+                                "id": "weightSamplesTab",
+                                "subsections": [
+                                    "freshFruitWeightSamplesSection"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "ObjectPage",
+                    "entityType": "FreshFruitWeightSamples",
+                    "objectPageContent": {
+                        "tableSectionAssociations": [],
+                        "sections": [],
+                        "tabs": []
+                    }
+                }
+            ],
+            "name": "fruitSizeProfileApp"
+        }
+    ]
+}

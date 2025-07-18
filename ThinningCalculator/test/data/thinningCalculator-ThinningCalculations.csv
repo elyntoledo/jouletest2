@@ -1,0 +1,6 @@
+ID;country;variety_code;dateFullBloom;dateThinning;dateHarvest;targetSizeRemove_code;thinningWeight
+c8010357-477f-492f-b540-48f771ddd2e7;France;SunGold;2023-04-15;2023-05-20;2023-09-10;Gold3:36;1.25
+54268dcf-d6ec-4dce-8bb3-35bb30cf764e;Italy;Green;2023-04-10;2023-05-18;2023-09-05;Hayward:42;1.30
+e1967488-c3ee-4487-bd5e-4ebb07c214a5;Japan;RubyRed;2023-04-12;2023-05-22;2023-09-12;Red19:46(NSS);1.40
+999a854d-7319-48e8-a4e5-f544994424bf;New Zealand;SunGold;2023-04-18;2023-05-25;2023-09-15;Gold3:39(NSS);1.35
+abc7912b-e62d-47a1-9ccb-bcf6ea138c4a;South Korea;Green;2023-04-20;2023-05-28;2023-09-18;Hayward:46(NSS);1.45

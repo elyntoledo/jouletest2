@@ -1,0 +1,12 @@
+I want to develop an SAP Fiori application that fulfills the requirements outlined in the following user story:  
+Description: As a user, I need to calculate the Fruit Size Profile based on fresh fruit weight samples and generate a summary of fruit counts, average weights, and a crop fruit size profile graph.  
+Fields:  
+Country (Dropdown: New Zealand, France, Italy, South Korea, Japan, Mandatory),  
+Cultivar (Dropdown: Gold3, Hayward, Red19, Mandatory),  
+FreshFruitWeightSamples (Comma-separated or list of fruit weights in grams, Mandatory),  
+FruitSizeWeightBand (Calculated, Numeric),  
+TotalFruitPieces (Calculated, Numeric),  
+AverageFreshFruitWeight (Calculated, Numeric),  
+AverageFruitSize (Calculated, Numeric),  
+CropFruitSizeProfileGraph (Calculated, Graph).  
+Selection Fields: Country, Cultivar. 

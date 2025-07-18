@@ -1,0 +1,13 @@
+code;name;criticality
+Gold3:36;Gold3: 36;0
+Gold3:39(NSS);Gold3: 39 (NSS);2
+Gold3:42(NSS);Gold3: 42 (NSS);2
+Gold3:Undersized;Gold3: Undersized;1
+Hayward:39;Hayward: 39;0
+Hayward:42;Hayward: 42;0
+Hayward:46(NSS);Hayward: 46 (NSS);2
+Hayward:Undersized;Hayward: Undersized;1
+Red19:42;Red19: 42;0
+Red19:46(NSS);Red19: 46 (NSS);2
+Red19:49(NSS);Red19: 49 (NSS);2
+Red19:Undersized;Red19: Undersized;1

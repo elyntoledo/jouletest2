@@ -1,0 +1,31 @@
+{
+    "version": "0.2",
+    "floorplan": "FE_LROP",
+    "project": {
+        "name": "fruitsizeprofileapp",
+        "targetFolder": "/home/user/projects/FruitSizeProfileCalculator2ndPrompt",
+        "title": "AI generated App fruitsizeprofileapp",
+        "description": "AI generated App fruitsizeprofileapp",
+        "ui5Version": "1.136.0",
+        "localUI5Version": "1.82.2",
+        "sapux": true
+    },
+    "service": {
+        "servicePath": "/odata/v4/fruit-size-profile-srv/",
+        "capService": {
+            "projectPath": "/home/user/projects/FruitSizeProfileCalculator2ndPrompt",
+            "serviceName": "fruitSizeProfileSrv",
+            "serviceCdsPath": "srv/service"
+        }
+    },
+    "entityConfig": {
+        "mainEntity": {
+            "entityName": "FruitSizeProfiles"
+        }
+    },
+    "projectType": "LIST_REPORT_OBJECT_PAGE",
+    "telemetryData": {
+        "generationSourceName": "AI Headless",
+        "generationSourceVersion": "1.18.2"
+    }
+}
